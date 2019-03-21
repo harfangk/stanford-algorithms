@@ -1,8 +1,4 @@
-module Main where
-
-main :: IO ()
-main =
-  putStrLn ""
+module Course1 (karatsuba) where
 
 karatsuba :: Integer -> Integer -> Integer
 karatsuba i j =
