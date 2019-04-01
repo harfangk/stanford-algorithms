@@ -1,0 +1,62 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 608704f730b89fd2980a895b0526b176421fc31319eaf1840704ebf8a51752b9
+
+name:           stanford-algorithms
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/stanford-algorithms#readme>
+homepage:       https://github.com/githubuser/stanford-algorithms#readme
+bug-reports:    https://github.com/githubuser/stanford-algorithms/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2019 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/stanford-algorithms
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_stanford_algorithms
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
+
+executable stanford-algorithms-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_stanford_algorithms
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , stanford-algorithms
+  default-language: Haskell2010
+
+test-suite stanford-algorithms-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_stanford_algorithms
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , stanford-algorithms
+  default-language: Haskell2010
