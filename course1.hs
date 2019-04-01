@@ -1,6 +1,8 @@
-module Course1 (karatsuba) where
+module Course1 where
 
-import Data.List
+import qualified Data.List
+import qualified Data.Set
+import qualified System.Random
 
 karatsuba :: Integer -> Integer -> Integer
 karatsuba i j =
@@ -23,7 +25,7 @@ karatsuba i j =
 countInversion :: IO ()
 countInversion = do
   file <- readFile "IntegerArray.txt"
-  let ints = map read (lines file) :: [Integer]
+  let ints = Data.List.map read (lines file) :: [Integer]
       (sortedArray, inversions) = count ints
   print inversions
 
@@ -46,7 +48,7 @@ count_ (xs, i) =
 halve :: [a] -> ([a],[a])
 halve xs =
   let lhx = length xs `div` 2
-  in (take lhx xs, drop lhx xs)
+  in (Data.List.take lhx xs, Data.List.drop lhx xs)
 
 
 countCrossInversion :: Ord a => [a] -> [a] -> Integer -> Integer
@@ -64,7 +66,7 @@ merge (x:xs) (y:ys) | x < y = x : merge xs (y:ys)
 countComparison :: IO ()
 countComparison = do
   file <- readFile "QuickSort.txt"
-  let ints = map read (lines file) :: [Integer]
+  let ints = Data.List.map read (lines file) :: [Integer]
   putStrLn "First as pivot:"
   print . firstAsPivot $ ints
   putStrLn "Last as pivot:"
@@ -105,7 +107,7 @@ medianAsPivot xs =
       middleE = if even l then xs !! (quot l 2 - 1) else xs !! quot l 2
       pivot = sort [head xs, middleE, last xs] !! 1
       comparisons = l - 1
-      listMinusPivot = filter (/= pivot) xs
+      listMinusPivot = Data.List.filter (/= pivot) xs
       ltPivotComparisons = medianAsPivot [x | x <- listMinusPivot, x < pivot]
       gtPivotComparisons = medianAsPivot [x | x <- listMinusPivot, x >= pivot]
   in
@@ -115,10 +117,25 @@ adjustLeftSublist :: [a] -> [a]
 adjustLeftSublist [] = []
 adjustLeftSublist [x] = [x]
 adjustLeftSublist [x,y] = [y,x]
-adjustLeftSublist xs = last xs : take (length xs - 1) xs
+adjustLeftSublist xs = last xs : Data.List.take (length xs - 1) xs
 
 swapFirstAndLast :: [a] -> [a]
 swapFirstAndLast [] = []
 swapFirstAndLast [x] = [x]
 swapFirstAndLast [x,y] = [y,x]
-swapFirstAndLast xs = last xs : drop 1 (take (length xs - 1) xs) ++ [head xs]
+swapFirstAndLast xs = last xs : Data.List.drop 1 (Data.List.take (length xs - 1) xs) ++ [head xs]
+
+{-
+1. create a representation of graph
+2. randomly choose a vertex v
+3. randomly choose an edge {v,u}
+4. add all edges {u,x} to v
+5. remove u
+6. make all edges {x,u} to point at v
+7. remove self-referencing edges {v,v}
+repeat until two vertices are left, then count edges
+-}
+
+newtype Graph = Graph (Data.Set.Set Vertex)
+data Vertex = Vertex Int (Data.Set.Set Int)
+
