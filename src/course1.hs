@@ -2,6 +2,7 @@ module Course1 where
 
 import qualified Data.List
 import qualified Data.Set
+import qualified Data.Map as M
 import qualified System.Random
 
 karatsuba :: Integer -> Integer -> Integer
@@ -101,11 +102,11 @@ lastAsPivot xs =
 
 medianAsPivot :: Ord a => [a] -> Int
 medianAsPivot [] = 0
-medianAsPivot [x] = 0
+medianAsPivot [_] = 0
 medianAsPivot xs =
   let l = length xs
       middleE = if even l then xs !! (quot l 2 - 1) else xs !! quot l 2
-      pivot = sort [head xs, middleE, last xs] !! 1
+      pivot = Data.List.sort [head xs, middleE, last xs] !! 1
       comparisons = l - 1
       listMinusPivot = Data.List.filter (/= pivot) xs
       ltPivotComparisons = medianAsPivot [x | x <- listMinusPivot, x < pivot]
@@ -134,8 +135,87 @@ swapFirstAndLast xs = last xs : Data.List.drop 1 (Data.List.take (length xs - 1)
 6. make all edges {x,u} to point at v
 7. remove self-referencing edges {v,v}
 repeat until two vertices are left, then count edges
+
 -}
 
 newtype Graph = Graph (Data.Set.Set Vertex)
 data Vertex = Vertex Int (Data.Set.Set Int)
 
+instance Eq Vertex where
+  (==) (Vertex i1 _) (Vertex i2 _) = (==) i1 i2
+
+instance Ord Vertex where
+  compare (Vertex i1 _) (Vertex i2 _) = compare i1 i2
+
+getEdges :: Vertex -> Data.Set.Set Int
+getEdges (Vertex _ edges) =
+  edges
+
+getIndex :: Vertex -> Int
+getIndex (Vertex i _) =
+  i
+
+chooseRandomVertex :: System.Random.StdGen -> (M.Map Int [Int]) -> ((Int, [Int]), System.Random.StdGen)
+chooseRandomVertex rndGen vertices =
+  let (i, newGen) = System.Random.randomR (0, (M.size vertices) - 1) rndGen
+      key = (M.keys vertices) !! i
+      edges = vertices M.! key
+      result = (key, edges)
+  in
+    (result, newGen)
+
+
+chooseRandomEdgeHead :: System.Random.StdGen -> [Int] -> (Int, System.Random.StdGen)
+chooseRandomEdgeHead rndGen edges =
+  let (i, newGen) = System.Random.randomR (0, (Data.List.length edges) - 1) rndGen
+  in
+    (edges !! i, newGen)
+{-
+contract
+1. randomly choose v
+2. randomly choose u among vertices adjacent to v
+3. make edges between u and its adjacent vertices, called newEdges, point at v
+4. remove u
+5. remove self-referencing edges from v
+6. add edges v-newEdges to v
+-}
+
+contractVertices :: (M.Map Int [Int], System.Random.StdGen) -> (M.Map Int [Int], System.Random.StdGen)
+contractVertices (vertices, rndGen) =
+  let
+    ((vi, vEdges), rndGen_) = chooseRandomVertex rndGen vertices
+    (ui, rndGen__) = chooseRandomEdgeHead rndGen_ vEdges
+    uEdges = vertices M.! ui
+    uEndsChangedToV =
+      Data.List.foldl (\acc w -> M.insert w (Data.List.map (\x -> if x == ui then vi else x) (acc M.! w)) acc) vertices uEdges
+    wEndsAddedToV =
+      M.insert vi (Data.List.filter (/= vi) ((uEndsChangedToV M.! vi) ++ uEdges)) uEndsChangedToV
+    uRemoved = M.delete ui wEndsAddedToV
+  in
+    (uRemoved, rndGen__)
+
+kargerMinCut :: (M.Map Int [Int], System.Random.StdGen) -> IO (M.Map Int [Int], System.Random.StdGen)
+kargerMinCut (vertices, rndGen) =
+  if M.size vertices <= 2 then
+    pure (vertices, rndGen)
+  else
+    do
+      kargerMinCut . contractVertices $ (vertices, rndGen)
+
+kargerMinCutMain :: Int -> IO ()
+kargerMinCutMain runs = do
+  file <- readFile "src/kargerMinCut.txt"
+  let strings = Data.List.map words (lines file) :: [[String]]
+  let ints = Data.List.map (Data.List.map read) strings :: [[Int]]
+  let vertexMap = Data.List.foldl (\vAcc v -> M.insert (Data.List.head v) (Data.List.drop 1 v) vAcc) M.empty ints
+  rndGen <- System.Random.getStdGen
+  kargerMinCutMain_ runs vertexMap rndGen
+
+kargerMinCutMain_ :: Int -> M.Map Int [Int] -> System.Random.StdGen -> IO ()
+kargerMinCutMain_ runs vertexMap rndGen = do
+  if runs == 0 then
+    pure ()
+  else do
+    (resultMap, rndGen_) <- kargerMinCut (vertexMap, rndGen)
+    putStrLn $ "Run: " ++ show runs ++ ", Min cut: " ++ show (Data.List.length (resultMap M.! ((M.keys resultMap) !! 0)))
+    kargerMinCutMain_ (runs - 1) vertexMap rndGen_

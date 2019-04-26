@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 608704f730b89fd2980a895b0526b176421fc31319eaf1840704ebf8a51752b9
+-- hash: cb3a15ff4c28714931c328100b8508a7c541a753a41a85e6946574048d2758b1
 
 name:           stanford-algorithms
 version:        0.1.0.0
@@ -34,6 +34,8 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , containers
+    , random
   default-language: Haskell2010
 
 executable stanford-algorithms-exe
@@ -45,6 +47,8 @@ executable stanford-algorithms-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
+    , random
     , stanford-algorithms
   default-language: Haskell2010
 
@@ -58,5 +62,7 @@ test-suite stanford-algorithms-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
+    , random
     , stanford-algorithms
   default-language: Haskell2010
