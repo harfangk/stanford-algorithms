@@ -66,7 +66,7 @@ dijkstraMain = do
   file <- readFile "src/dijkstraData.txt"
   let graph =  List.foldl (\acc (v, es) -> Map.insert v es acc) Map.empty . List.map (parseAdjacencyList . words) . lines $ file :: WeightedGraph
       minDists = Map.fromAscList (List.map (\k -> (k,1000000)) [1.. 200])
-      result = dijkstra graph (Node 0 1 []) minDists
+      result = dijkstra graph (MinNode 0 1 []) minDists
       targets = [7,37,59,82,99,115,133,165,188,197]
       answer = List.map (\i -> result Map.! i) targets
   print answer
@@ -88,8 +88,8 @@ parseAdjacencyList (x:xs) =
                                       where (w, s'') =
                                              break (== ',') s'
 
-dijkstra :: WeightedGraph -> Heap Int Int -> Map.Map Int Int -> Map.Map Int Int
-dijkstra g h minDists | Map.null g || isEmpty h = minDists
+dijkstra :: WeightedGraph -> MinHeap Int Int -> Map.Map Int Int -> Map.Map Int Int
+dijkstra g h minDists | Map.null g || isEmptyMin h = minDists
 dijkstra g h minDists =
   case Map.lookup nodeLabel g of
     Nothing -> dijkstra g' h' minDists
@@ -100,37 +100,149 @@ dijkstra g h minDists =
     minDists' = Map.insertWith (\newValue oldValue -> minimum [newValue, oldValue]) nodeLabel d minDists
 
 
-updateHeap :: Int -> [(Int, Int)] -> Heap Int Int -> Heap Int Int
+updateHeap :: Int -> [(Int, Int)] -> MinHeap Int Int -> MinHeap Int Int
 updateHeap d es h =
-  merge h (mergeAll (List.map (\(edgeHead, edgeWeight) -> Node (edgeWeight + d) edgeHead []) es) )
+  mergeMin h (mergeMinAll (List.map (\(edgeHead, edgeWeight) -> MinNode (edgeWeight + d) edgeHead []) es) )
 
-data Heap k v = Empty | Node k v [Heap k v]
+data MinHeap k v = MinEmpty | MinNode k v [MinHeap k v]
 
-instance (Show k, Show v) => Show (Heap k v) where
+instance (Show k, Show v) => Show (MinHeap k v) where
   show h =
     case h of
-      Empty -> "Heap.Empty"
-      Node k v hs -> "Heap.Node(" ++ show k ++ ", " ++ show v ++ ", " ++ (show . length $ hs) ++ ")"
+      MinEmpty -> "MinHeap.Empty"
+      MinNode k v hs -> "MinHeap.Node(" ++ show k ++ ", " ++ show v ++ ", " ++ (show . length $ hs) ++ ")"
 
-insert :: (Ord k, Ord v) => (k, v) -> Heap k v -> Heap k v
-insert (key, val) = merge (Node key val [])
+insertMin :: (Ord k) => (k, v) -> MinHeap k v -> MinHeap k v
+insertMin (key, val) = mergeMin (MinNode key val [])
 
-merge :: (Ord k, Ord v) => Heap k v -> Heap k v -> Heap k v
-merge h Empty = h
-merge Empty h = h
-merge h1@(Node key1 value1 hs1) h2@(Node key2 value2 hs2)
-  | key1 < key2 = Node key1 value1 (h2:hs1)
-  | otherwise = Node key2 value2 (h1:hs2)
+mergeMin :: (Ord k) => MinHeap k v -> MinHeap k v -> MinHeap k v
+mergeMin h MinEmpty = h
+mergeMin MinEmpty h = h
+mergeMin h1@(MinNode key1 value1 hs1) h2@(MinNode key2 value2 hs2)
+  | key1 < key2 = MinNode key1 value1 (h2:hs1)
+  | otherwise = MinNode key2 value2 (h1:hs2)
 
-mergeAll :: (Ord k, Ord v) => [Heap k v] -> Heap k v
-mergeAll [] = Empty
-mergeAll [h] = h
-mergeAll (h:h':hs) = merge (merge h h') (mergeAll hs)
+mergeMinAll :: (Ord k) => [MinHeap k v] -> MinHeap k v
+mergeMinAll [] = MinEmpty
+mergeMinAll [h] = h
+mergeMinAll (h:h':hs) = mergeMin (mergeMin h h') (mergeMinAll hs)
 
-isEmpty :: Heap k v -> Bool
-isEmpty Empty = True
-isEmpty _ = False
+isEmptyMin :: MinHeap k v -> Bool
+isEmptyMin MinEmpty = True
+isEmptyMin _ = False
 
-extractMin :: (Ord k, Ord v) => Heap k v -> (k, v, Heap k v)
-extractMin Empty = error "Heap extractMin: empty Heap"
-extractMin (Node key value hs) = (key, value, mergeAll hs)
+extractMin :: (Ord k) => MinHeap k v -> (k, v, MinHeap k v)
+extractMin MinEmpty = error "MinHeap extractMin: empty MinHeap"
+extractMin (MinNode key value hs) = (key, value, mergeMinAll hs)
+
+sizeMin :: (Ord k) => MinHeap k v -> Int
+sizeMin MinEmpty = 0
+sizeMin (MinNode _ _ hs) = (1 + (foldl (+) 0 (List.map sizeMin hs)))
+
+findMin :: (Ord k) => MinHeap k v -> (k, v)
+findMin MinEmpty = error "MinHeap.findMin: empty heap"
+findMin (MinNode k v _) = (k, v)
+
+data MaxHeap k v = MaxEmpty | MaxNode k v [MaxHeap k v]
+
+instance (Show k, Show v) => Show (MaxHeap k v) where
+  show h =
+    case h of
+      MaxEmpty -> "MaxHeap.Empty"
+      MaxNode k v hs -> "MaxHeap.Node(" ++ show k ++ ", " ++ show v ++ ", " ++ (show . length $ hs) ++ ")"
+
+insertMax :: (Ord k) => (k, v) -> MaxHeap k v -> MaxHeap k v
+insertMax (key, val) = mergeMax (MaxNode key val [])
+
+mergeMax :: (Ord k) => MaxHeap k v -> MaxHeap k v -> MaxHeap k v
+mergeMax h MaxEmpty = h
+mergeMax MaxEmpty h = h
+mergeMax h1@(MaxNode key1 value1 hs1) h2@(MaxNode key2 value2 hs2)
+  | key1 > key2 = MaxNode key1 value1 (h2:hs1)
+  | otherwise = MaxNode key2 value2 (h1:hs2)
+
+mergeMaxAll :: (Ord k) => [MaxHeap k v] -> MaxHeap k v
+mergeMaxAll [] = MaxEmpty
+mergeMaxAll [h] = h
+mergeMaxAll (h:h':hs) = mergeMax (mergeMax h h') (mergeMaxAll hs)
+
+isEmptyMax :: MaxHeap k v -> Bool
+isEmptyMax MaxEmpty = True
+isEmptyMax _ = False
+
+extractMax :: (Ord k) => MaxHeap k v -> (k, v, MaxHeap k v)
+extractMax MaxEmpty = error "MaxHeap extractMax: empty MaxHeap"
+extractMax (MaxNode key value hs) = (key, value, mergeMaxAll hs)
+
+findMax :: (Ord k) => MaxHeap k v -> (k, v)
+findMax MaxEmpty = error "MaxHeap.findMax: empty heap"
+findMax (MaxNode k v _) = (k, v)
+
+sizeMax :: (Ord k) => MaxHeap k v -> Int
+sizeMax MaxEmpty = 0
+sizeMax (MaxNode _ _ hs) = (1 + (foldl (+) 0 (List.map sizeMax hs)))
+
+medianMain :: IO ()
+medianMain = do
+  file <- readFile "src/Median.txt"
+  let ns =  List.map read . lines $ file :: [Int]
+      (_, _, medians) = List.foldl median (MaxEmpty, MinEmpty, [] :: [Int]) ns
+      result = mod (List.foldl (+) 0 ( medians)) 10000
+  print result
+
+
+median :: (MaxHeap Int Int, MinHeap Int Int, [Int]) -> Int -> (MaxHeap Int Int, MinHeap Int Int, [Int])
+median (h1, h2, medians) i =
+  case (h1Size, h2Size) of
+    (0, 0) ->
+      (insertMax (i, i) h1, h2, [i])
+    (1, 0) ->
+      let
+        (m, _, _) = extractMax h1
+        smallerVal = min m i
+        largerVal = max m i
+        h1' = insertMax (smallerVal, smallerVal) MaxEmpty
+        h2' = insertMin (largerVal, largerVal) MinEmpty
+      in
+        (h1', h2', smallerVal:medians)
+    (0, 1) ->
+      error "median: Heap of larger elements cannot have more elements than heap of smaller elements"
+    _ ->
+      let
+        h1Max = fst . findMax $ h1
+        h2Min = fst . findMin $ h2
+      in
+      case compare h1Size h2Size of
+        EQ ->
+          if i > h2Min then
+            let
+              (_, _, h2') = extractMin h2
+              h1' = insertMax (h2Min, h2Min) h1
+              h2'' = insertMin (i,i) h2'
+            in
+              (h1', h2'', (fst . findMax $ h1'):medians)
+          else
+            let
+              h1' = insertMax (i,i) h1
+            in
+              (h1', h2, (fst . findMax $ h1'):medians)
+        GT ->
+          if i >= h2Min then
+            let
+              h2' = insertMin (i,i) h2
+            in
+              (h1, h2', h1Max:medians)
+          else
+            let
+              (_, _, h1') = extractMax h1
+              largerVal = max h1Max i
+              smallerVal = min h1Max i
+              h1'' = insertMax (smallerVal, smallerVal) h1'
+              h2' = insertMin (largerVal, largerVal) h2
+            in
+              (h1'', h2', (fst . findMax $ h1''):medians)
+        LT ->
+          error "median: Heap of larger elements cannot have more elements than heap of smaller elements"
+  where
+    h1Size = sizeMax h1
+    h2Size = sizeMin h2
