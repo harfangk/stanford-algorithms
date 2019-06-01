@@ -1,4 +1,4 @@
-module Course2.MinHeap (MinHeap(Empty,Node), empty, insert, merge, update, mergeAll, isEmpty, extract, find, size) where
+module MinHeap (MinHeap(Empty,Node), empty, insert, merge, update, mergeAll, isEmpty, extract, find, size) where
 
 data MinHeap k v = Empty | Node k v [MinHeap k v]
 

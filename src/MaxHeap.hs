@@ -1,4 +1,4 @@
-module Course2.MaxHeap (MaxHeap(Empty,Node), empty, insert, merge, mergeAll, isEmpty, extract, find, size, update) where
+module MaxHeap (MaxHeap(Empty,Node), empty, insert, merge, mergeAll, isEmpty, extract, find, size, update) where
 
 data MaxHeap k v = Empty | Node k v [MaxHeap k v]
 

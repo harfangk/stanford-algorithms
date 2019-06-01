@@ -2,8 +2,8 @@ module Course1.Week3 where
 
 import Data.List
 
-countComparison :: IO ()
-countComparison = do
+main :: IO ()
+main = do
   file <- readFile "QuickSort.txt"
   let ints = Data.List.map read (lines file) :: [Integer]
   putStrLn "First as pivot:"
