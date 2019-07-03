@@ -1,4 +1,6 @@
-module MinHeap (MinHeap(Empty,Node), empty, insert, merge, update, mergeAll, isEmpty, extract, find, size) where
+module MinHeap (MinHeap(Empty,Node), empty, insert, merge, update, mergeAll, isEmpty, extract, find, size, extractByV) where
+
+import qualified Data.List as List
 
 data MinHeap k v = Empty | Node k v [MinHeap k v]
 
@@ -8,12 +10,12 @@ instance (Show k, Show v) => Show (MinHeap k v) where
       Empty -> "MinHeap.Empty"
       Node k v hs -> "MinHeap.Node(" ++ show k ++ ", " ++ show v ++ ", " ++ (show . length $ hs) ++ ")"
 
-empty :: MaxHeap k v
+empty :: MinHeap k v
 empty = Empty
 
 update :: Int -> [(Int, Int)] -> MinHeap Int Int -> MinHeap Int Int
 update d es h =
-  merge h (mergeAll (List.map (\(edgeHead, edgeWeight) -> MinNode (edgeWeight + d) edgeHead []) es) )
+  merge h (mergeAll (List.map (\(edgeHead, edgeWeight) -> Node (edgeWeight + d) edgeHead []) es) )
 
 insert :: (Ord k) => (k, v) -> MinHeap k v -> MinHeap k v
 insert (key, val) = merge (Node key val [])
@@ -45,3 +47,19 @@ size (Node _ _ hs) = (1 + (foldl (+) 0 (List.map size hs)))
 find :: (Ord k) => MinHeap k v -> (k, v)
 find Empty = error "MinHeap.find: empty heap"
 find (Node k v _) = (k, v)
+
+extractByV :: (Show v, Ord k, Eq v) => v -> MinHeap k v -> (Maybe (k, v), MinHeap k v)
+extractByV _ Empty = (Nothing, empty)
+extractByV val (Node k v hs) =
+  if val == v then
+    (Just (k, v), mergeAll hs)
+  else
+    extractByV' val (mergeAll hs) (Node k v [])
+
+extractByV' :: (Show v, Ord k, Eq v) => v -> MinHeap k v -> MinHeap k v -> (Maybe (k, v), MinHeap k v)
+extractByV' _ Empty visitedH = (Nothing, visitedH)
+extractByV' val (Node k v hs) visitedH =
+  if val == v then
+    (Just (k, v), mergeAll (visitedH:hs))
+  else
+    extractByV' val (mergeAll hs) (MinHeap.insert (k, v) visitedH)
