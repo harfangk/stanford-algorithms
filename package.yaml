@@ -24,6 +24,7 @@ dependencies:
 - random
 - containers
 - hashtables
+- array
 
 library:
   source-dirs: src

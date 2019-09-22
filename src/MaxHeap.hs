@@ -11,9 +11,9 @@ instance (Show k, Show v) => Show (MaxHeap k v) where
 empty :: MaxHeap k v
 empty = Empty
 
-update :: Int -> [(Int, Int)] -> MinHeap Int Int -> MinHeap Int Int
+update :: Int -> [(Int, Int)] -> MaxHeap Int Int -> MaxHeap Int Int
 update d es h =
-  merge h (mergeAll (List.map (\(edgeHead, edgeWeight) -> Node (edgeWeight + d) edgeHead []) es) )
+  merge h (mergeAll (map (\(edgeHead, edgeWeight) -> Node (edgeWeight + d) edgeHead []) es) )
 
 insert :: (Ord k) => (k, v) -> MaxHeap k v -> MaxHeap k v
 insert (key, val) = merge (Node key val [])
@@ -44,4 +44,4 @@ find (Node k v _) = (k, v)
 
 size :: (Ord k) => MaxHeap k v -> Int
 size Empty = 0
-size (Node _ _ hs) = (1 + (foldl (+) 0 (List.map size hs)))
+size (Node _ _ hs) = (+) 1 . foldl (+) 0 $ map size hs

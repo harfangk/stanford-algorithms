@@ -1,6 +1,5 @@
 module Course2.Week3 where
 
-import qualified Data.Set as Set
 import qualified Data.Map as Map
 import qualified Data.List as List
 import qualified MinHeap as MinHeap
@@ -25,7 +24,7 @@ median (h1, h2, medians) i =
       (MaxHeap.insert (i, i) h1, h2, [i])
     (1, 0) ->
       let
-        (m, _, _) = extractMax h1
+        (m, _, _) = MaxHeap.extract h1
         smallerVal = min m i
         largerVal = max m i
         h1' = MaxHeap.insert (smallerVal, smallerVal) MaxHeap.empty
@@ -34,12 +33,12 @@ median (h1, h2, medians) i =
         (h1', h2', smallerVal:medians)
     (0, 1) ->
       error "median: Heap of larger elements cannot have more elements than heap of smaller elements"
-    _ ->
+    (h1Size', h2Size') ->
       let
         h1Max = fst . MaxHeap.find $ h1
         h2Min = fst . MinHeap.find $ h2
       in
-      case compare h1Size h2Size of
+      case compare h1Size' h2Size' of
         EQ ->
           if i > h2Min then
             let
@@ -71,5 +70,5 @@ median (h1, h2, medians) i =
         LT ->
           error "median: Heap of larger elements cannot have more elements than heap of smaller elements"
   where
-    h1Size = sizeMax h1
-    h2Size = sizeMin h2
+    h1Size = MaxHeap.size h1
+    h2Size = MinHeap.size h2

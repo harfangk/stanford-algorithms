@@ -1,6 +1,5 @@
 module Course2.Week2 where
 
-import qualified Data.Set as Set
 import qualified Data.Map as Map
 import qualified Data.List as List
 import qualified MinHeap
@@ -35,11 +34,11 @@ parseAdjacencyList (x:xs) =
                                              break (== ',') s'
 
 dijkstra :: WeightedGraph -> MinHeap.MinHeap Int Int -> Map.Map Int Int -> Map.Map Int Int
-dijkstra g h minDists | Map.null g || isEmptyMin h = minDists
+dijkstra g h minDists | Map.null g || MinHeap.isEmpty h = minDists
 dijkstra g h minDists =
   case Map.lookup nodeLabel g of
     Nothing -> dijkstra g' h' minDists
-    Just es -> dijkstra g' (updateHeap d es h') minDists'
+    Just es -> dijkstra g' (MinHeap.update d es h') minDists'
   where
     (d, nodeLabel, h') = MinHeap.extract h
     g' = Map.delete nodeLabel g

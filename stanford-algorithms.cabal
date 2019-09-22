@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 66a13cae44d43c8b11fd42c65dae7205f62b4405daf787508a7db8dcad583b03
+-- hash: bbb691da65740223cbefd015340f95d53191fd8aaed07c3489465a00afa94dbc
 
 name:           stanford-algorithms
 version:        0.1.0.0
@@ -38,6 +38,7 @@ library
       Course3.Week1
       Course3.Week2
       Course3.Week3
+      Course3.Week4
       MaxHeap
       MinHeap
   other-modules:
@@ -45,7 +46,8 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
     , containers
     , hashtables
     , random
@@ -59,7 +61,8 @@ executable stanford-algorithms-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
     , containers
     , hashtables
     , random
@@ -75,7 +78,8 @@ test-suite stanford-algorithms-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
     , containers
     , hashtables
     , random
