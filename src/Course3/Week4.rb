@@ -44,4 +44,5 @@ def parseKnapsackData(file)
   return [knapsack_size, item_count, items]
 end
 
+knapsack("./src/Course3/knapsack1.txt")
 knapsack("./src/Course3/knapsack_big.txt")
