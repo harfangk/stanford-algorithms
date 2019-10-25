@@ -1,5 +1,5 @@
 $hash = Hash.new
-$items
+$items = []
 
 def knapsack(file)
   knapsack_size, item_count, items, *_ = parseKnapsackData(file)
@@ -14,25 +14,21 @@ def solve(i,x)
   else
     v = $items[i-1][0]
     w = $items[i-1][1]
-    val1 = $hash["#{i-1},#{x}"]
-    val2 = $hash["#{i-1},#{x-w}"]
-    if val1
-      # puts "hit cache for val1, #{i-1},#{x}, #{val1}"
-    else
-      val1 = solve(i-1,x)
-    end
+    val1 = $hash["#{i-1},#{x}"] || solve(i-1,x)
     if x-w < 0
-      val2 = 0
-    elsif val2
-     #  puts "hit cache for val2, #{i-1},#{x-w}, #{val2}"
-      val2 = val2 + v
+      $hash["#{i},#{x}"] = val1
+      return val1
     else
-      val2 = solve(i-1,x-w) + v
+      val2 = $hash["#{i-1},#{x-w}"]
+      if val2
+        val2 += v
+      else
+        val2 = solve(i-1,x-w) + v
+      end
+      val = [val1,val2].max
+      $hash["#{i},#{x}"] = val
+      return val
     end
-    # puts "i,x: #{i},#{x}; v,w: #{v},#{w}; val1,val2: #{val1},#{val2}"
-    val = [val1,val2].max
-    $hash["#{i},#{x}"] = val
-    return val
   end
 end
 
