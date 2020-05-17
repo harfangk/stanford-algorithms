@@ -25,6 +25,7 @@ dependencies:
 - containers
 - hashtables
 - array
+- pqueue
 
 library:
   source-dirs: src
