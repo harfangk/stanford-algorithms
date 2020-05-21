@@ -5,16 +5,11 @@ module Course4.Week1 where
 import qualified Data.List as List
 import qualified Data.Map as Map
 import qualified Data.IntMap.Strict as IntMap
-import qualified Data.Sequence as Seq
 import qualified Data.Array as Array
-import qualified Data.Array.ST as MArray
-import qualified Data.Maybe as Maybe
 import qualified Control.Monad.ST as ST
-import qualified Control.Monad as CM
 import qualified Data.HashTable.Class as HT
 import qualified Data.HashTable.ST.Cuckoo as Cuckoo
 import qualified Data.PQueue.Prio.Min as MinHeap
-import Debug.Trace
 
 type HashTable s k v = Cuckoo.HashTable s k v
 
@@ -68,15 +63,15 @@ addExtraVertexForJohnson (vertexCount, edgeCount, edges) =
     newEdges = List.map (0,, 0) [1..vertexCount]
     edges' = edges ++ newEdges
 
-buildAdjacencyList :: (Fractional a, Ord a) => (Int, Int, [(Int, Int, a)]) -> IntMap.IntMap [(Int, a)]
+buildAdjacencyList :: (Fractional a, Ord a) => (Int, Int, [(Int, Int, a)]) -> Array.Array Int [(Int, a)]
 buildAdjacencyList (vertexCount, _, edges) =
-  List.foldl' (\acc (t, h, w) -> IntMap.update (\edges' -> Just ((h,w):edges')) t acc) initialMap $ edges
+  Array.array (1,vertexCount) $ IntMap.toList . List.foldl' (\acc (t, h, w) -> IntMap.update (\edges' -> Just ((h,w):edges')) t acc) initialMap $ edges
   where
     initialMap = IntMap.fromList (List.zip [1..vertexCount] (List.repeat []))
 
-buildAdjacencyListByHead :: (Fractional a, Ord a) => (Int, Int, [(Int, Int, a)]) -> IntMap.IntMap [(Int, a)]
+buildAdjacencyListByHead :: (Fractional a, Ord a) => (Int, Int, [(Int, Int, a)]) -> Array.Array Int [(Int, a)]
 buildAdjacencyListByHead (vertexCount, _, edges) =
-  List.foldl' (\acc (t, h, w) -> IntMap.update (\edges' -> Just ((t,w):edges')) h acc) initialMap $ edges
+  Array.array (1,vertexCount) $ IntMap.toList . List.foldl' (\acc (t, h, w) -> IntMap.update (\edges' -> Just ((t,w):edges')) h acc) initialMap $ edges
   where
     initialMap = IntMap.fromList (List.zip [1..vertexCount] (List.repeat []))
 
@@ -111,7 +106,7 @@ dijkstra' g h minDists =
         weightUv = snd . head . List.filter (\(edgeHead,_) -> edgeHead == v) $ (IntMap.!) g u
         distV' = distU + weightUv
 
-bellmanFord :: IntMap.IntMap [(Int, Double)] -> Int -> Int -> Either String (Array.Array Int Double)
+bellmanFord :: Array.Array Int [(Int, Double)] -> Int -> Int -> Either String (Array.Array Int Double)
 bellmanFord g vertexCount s =
   if hasNegativeCycle then
     Left "Bellman-Ford algorithm halted: negative cycle found"
@@ -127,11 +122,10 @@ bellmanFord g vertexCount s =
           (pair, 1/0)
       else
         (pair, findMin pair)
-    -- findMin (i,v) = min ((Array.!) memo (i-1,v)) (List.foldl' (\acc (t,w) -> min acc ((Array.!) memo (i-1,t) + w)) (1/0) ((IntMap.!) g v))
-    findMin (i, v) = minimum ( memo Array.! (i - 1, v) : map (\(t, w) -> memo Array.! (i - 1, t) + w) (g IntMap.! v))
+    findMin (i,v) = min ({-# SCC accessMemo #-} (Array.!) memo (i-1,v)) ({-# SCC foldl' #-} List.foldl' (\acc (t,w) -> {-# SCC foldStep #-} min acc ((Array.!) memo (i-1,t) + w)) (1/0) ({-# SCC accessGraph #-} (Array.!) g v))
     resultList = map (\((_,v), d) -> (v,d)) . filter (\((i,_), _) -> i == vertexCount - 1 ) . Array.assocs $ memo
     resultArray = Array.array (1, vertexCount) resultList
-    hasNegativeCycle = any (\(v, d) -> any (\(t, w) -> d > resultArray Array.! t + w) (g IntMap.! v)) resultList
+    hasNegativeCycle = any (\(v, d) -> any (\(t, w) -> d > resultArray Array.! t + w) (g Array.! v)) resultList
 --    hasNegativeCycle = or . concatMap (\(v,d) -> map (\(t,w) -> d > (Array.!) resultArray t + w) ((IntMap.!) g v)) $ resultList
 
   {-
