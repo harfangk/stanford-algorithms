@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6abebd27eb47dce79b205fbb4e4df747a9b0165c6a8cbdbca6fd47b9ed838971
+-- hash: fe363267557488b8831853491cf6a2a0f6dc34641564e12b3b6c67ad505f071b
 
 name:           stanford-algorithms
 version:        0.1.0.0
@@ -40,6 +40,7 @@ library
       Course3.Week3
       Course3.Week4
       Course4.Week1
+      Course4.Week2
       MaxHeap
       MinHeap
   other-modules:
@@ -49,6 +50,7 @@ library
   build-depends:
       array
     , base >=4.7 && <5
+    , bytestring
     , containers
     , hashtables
     , pqueue
@@ -65,6 +67,7 @@ executable stanford-algorithms-exe
   build-depends:
       array
     , base >=4.7 && <5
+    , bytestring
     , containers
     , hashtables
     , pqueue
@@ -83,6 +86,7 @@ test-suite stanford-algorithms-test
   build-depends:
       array
     , base >=4.7 && <5
+    , bytestring
     , containers
     , hashtables
     , pqueue

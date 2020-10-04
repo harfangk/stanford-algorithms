@@ -26,6 +26,7 @@ dependencies:
 - hashtables
 - array
 - pqueue
+- bytestring
 
 library:
   source-dirs: src
