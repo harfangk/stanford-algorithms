@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fe363267557488b8831853491cf6a2a0f6dc34641564e12b3b6c67ad505f071b
+-- hash: a9afeef56f4936d975fecacfdaf25dc6ca712ec293056c4a554014f4cdfd03c1
 
 name:           stanford-algorithms
 version:        0.1.0.0
@@ -51,6 +51,7 @@ library
       array
     , base >=4.7 && <5
     , bytestring
+    , bytestring-lexing
     , containers
     , hashtables
     , pqueue
@@ -68,6 +69,7 @@ executable stanford-algorithms-exe
       array
     , base >=4.7 && <5
     , bytestring
+    , bytestring-lexing
     , containers
     , hashtables
     , pqueue
@@ -87,6 +89,7 @@ test-suite stanford-algorithms-test
       array
     , base >=4.7 && <5
     , bytestring
+    , bytestring-lexing
     , containers
     , hashtables
     , pqueue

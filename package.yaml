@@ -27,6 +27,7 @@ dependencies:
 - array
 - pqueue
 - bytestring
+- bytestring-lexing
 
 library:
   source-dirs: src
