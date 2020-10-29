@@ -1,9 +1,9 @@
 module Main where
 
-import qualified Course4.Week2
+import qualified Course4.Week3
 
 main :: IO ()
 main = do
-  (nodeCount, coordinates) <- Course4.Week2.parseData "./src/Course4/tsp.txt"
-  let result = Course4.Week2.tsp nodeCount coordinates
+  (nodeCount, coordinates) <- Course4.Week3.parseData "./src/Course4/nn.txt"
+  let result = Course4.Week3.tsp nodeCount coordinates
   print result
