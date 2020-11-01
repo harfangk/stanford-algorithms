@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2378dbea13efab0b1d58376dd51bc9cdaff12e5cf4677a05082374870202bbb2
+-- hash: 8c4b8e2bc2d1c1affbc57ea0e58d36311f02d1a9b2e345f6ff6189c3f8e8e59e
 
 name:           stanford-algorithms
 version:        0.1.0.0
@@ -42,6 +42,7 @@ library
       Course4.Week1
       Course4.Week2
       Course4.Week3
+      Course4.Week4
       MaxHeap
       MinHeap
   other-modules:
